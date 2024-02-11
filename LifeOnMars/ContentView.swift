@@ -9,13 +9,39 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Spacer()
+        HStack {
+            Spacer()
+            ScrollView {
+                VStack(alignment: .leading) {
+                    ForEach(0..<8000) { MyIndex in
+                        Text(FormatCoreOutput(MyIndex)).monospaced()
+                    }
+                }
+            }
+            Spacer()
+            HStack {
+                Button("Start") {
+                    Core[10].AfieldAddress = 666
+                }
+                Button("Stop") {
+                    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Action@*/ /*@END_MENU_TOKEN@*/
+                }
+            }
+            Spacer()
         }
-        .padding()
+        //       VStack {
+        //            ForEach(1..<25) { Vindex in
+        //                HStack {
+        //                    ForEach(1..<25) { Hindex in
+        //                        Rectangle()
+        //                            .fill(.red)
+        //                            .aspectRatio(1.0, contentMode: .fit)
+        //                    }
+        //                }
+        //            }
+        //        }
+        Spacer()
     }
 }
 

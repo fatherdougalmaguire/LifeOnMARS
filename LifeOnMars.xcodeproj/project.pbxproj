@@ -11,6 +11,7 @@
 		EA4006532B7733080067FCF9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4006522B7733080067FCF9 /* ContentView.swift */; };
 		EA4006552B7733090067FCF9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA4006542B7733090067FCF9 /* Assets.xcassets */; };
 		EA4006582B7733090067FCF9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA4006572B7733090067FCF9 /* Preview Assets.xcassets */; };
+		EA4006602B7733540067FCF9 /* EmulatorCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA40065F2B7733540067FCF9 /* EmulatorCore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		EA4006542B7733090067FCF9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EA4006572B7733090067FCF9 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		EA4006592B7733090067FCF9 /* LifeOnMars.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeOnMars.entitlements; sourceTree = "<group>"; };
+		EA40065F2B7733540067FCF9 /* EmulatorCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorCore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 			children = (
 				EA4006502B7733080067FCF9 /* LifeOnMarsApp.swift */,
 				EA4006522B7733080067FCF9 /* ContentView.swift */,
+				EA40065F2B7733540067FCF9 /* EmulatorCore.swift */,
 				EA4006542B7733090067FCF9 /* Assets.xcassets */,
 				EA4006592B7733090067FCF9 /* LifeOnMars.entitlements */,
 				EA4006562B7733090067FCF9 /* Preview Content */,
@@ -139,6 +142,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA4006602B7733540067FCF9 /* EmulatorCore.swift in Sources */,
 				EA4006532B7733080067FCF9 /* ContentView.swift in Sources */,
 				EA4006512B7733080067FCF9 /* LifeOnMarsApp.swift in Sources */,
 			);
