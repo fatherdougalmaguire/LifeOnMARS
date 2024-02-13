@@ -8,25 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject var ThisEmulatorCore = EmulatorCore()
+    
     var body: some View {
         Spacer()
         HStack {
             Spacer()
             ScrollView {
                 VStack(alignment: .leading) {
-                    ForEach(0..<8000) { MyIndex in
-                        Text(FormatCoreOutput(MyIndex)).monospaced()
-                    }
+                    ForEach(0..<ThisEmulatorCore.CoreSize) { MyIndex in Text(ThisEmulatorCore.FormatCoreOutput(MyIndex)).monospaced().foregroundColor(ThisEmulatorCore.Core[MyIndex].InstructionColour)
+                        }
                 }
             }
             Spacer()
             HStack {
                 Button("Start") {
-                    Core[10].AfieldAddress = 666
+                  
+                       ThisEmulatorCore.LoadCore()
+                    ThisEmulatorCore.CoreRunMode(true)
+                         ThisEmulatorCore.CoreExecute()
+                
                 }
                 Button("Stop") {
-                    /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Action@*/ /*@END_MENU_TOKEN@*/
-                }
+                   ThisEmulatorCore.CoreRunMode(false)
+                   }
             }
             Spacer()
         }
