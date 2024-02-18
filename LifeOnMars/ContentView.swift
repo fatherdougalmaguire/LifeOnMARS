@@ -18,21 +18,39 @@ struct ContentView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     ForEach(0..<ThisEmulatorCore.CoreSize) { MyIndex in Text(ThisEmulatorCore.FormatCoreOutput(MyIndex)).monospaced().foregroundColor(ThisEmulatorCore.Core[MyIndex].InstructionColour)
-                        }
+                    }
                 }
             }
             Spacer()
-            HStack {
-                Button("Start") {
-                  
-                       ThisEmulatorCore.LoadCore()
-                    ThisEmulatorCore.CoreRunMode(true)
-                         ThisEmulatorCore.CoreExecute()
-                
+            VStack(alignment: .leading) {
+                ScrollView  {
+                    VStack(alignment: .leading) {
+                        if ThisEmulatorCore.Warriors.count > 0 {
+                            ForEach(0..<ThisEmulatorCore.Warriors.count) { MyIndex in
+                                Text(ThisEmulatorCore.Warriors[MyIndex].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[MyIndex].WarriorStartCoreAddress))
+                                    .foregroundColor(ThisEmulatorCore.Warriors[MyIndex].WarriorColour)
+                            }
+                        }
+                    }
                 }
-                Button("Stop") {
-                   ThisEmulatorCore.CoreRunMode(false)
-                   }
+                Button("Start Battle") {
+                    ThisEmulatorCore.SetCoreCycles(10)
+                    ThisEmulatorCore.CoreRunMode(true)
+                    ThisEmulatorCore.CoreExecute()
+                }
+                Button("End Battle") {
+                    ThisEmulatorCore.CoreRunMode(false)
+                }
+                Button("Load Warriors") {
+                    ThisEmulatorCore.SetCoreCycles(10)
+                    ThisEmulatorCore.LoadCore()
+                }
+                Button("Reset Core") {
+                    ThisEmulatorCore.ResetCore()
+                }
+                Button("Step Through Core") {
+                    ThisEmulatorCore.CoreStepExecute()
+                }
             }
             Spacer()
         }

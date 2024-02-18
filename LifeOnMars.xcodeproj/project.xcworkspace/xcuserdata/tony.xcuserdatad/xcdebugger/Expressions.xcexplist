@@ -9,7 +9,24 @@
                value = "CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)">
             </PersistentString>
             <PersistentString
+               value = "CoreWarriorQueue.count">
+            </PersistentString>
+            <PersistentString
                value = "CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "EmulatorCore.LoadCore():EmulatorCore.swift">
+      </ContextState>
+      <ContextState
+         contextName = "EmulatorCore.CoreStepExecute():EmulatorCore.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)]">
+            </PersistentString>
+            <PersistentString
+               value = " CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

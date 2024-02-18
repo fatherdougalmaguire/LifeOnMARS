@@ -42,28 +42,47 @@ class EmulatorCore : ObservableObject {
     struct RedCodeInstruction {
         
         var OpCode:RedCodeInstructionType = RedCodeInstructionType.DAT
-        var AfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Direct
+        var AfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Immediate
         var AfieldAddress:Int = 0
-        var BfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Direct
+        var BfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Immediate
         var BfieldAddress:Int = 0
         var InstructionColour:Color = .black
-
-    }
-    
-    struct ProcessQueue {
         
-        var Program:Int
-        var Process:Int
     }
     
+    struct Warrior {
+        var WarriorProgramID : Int
+        var WarriorProgramTitle : String
+        var WarriorCode : Array<RedCodeInstruction>
+        var WarriorStartCoreAddress : Int
+        var WarriorColour : Color
+    }
+    
+    struct WarriorQueue {
+        
+        var WarriorProgramID : Int
+        var WarriorProcessID : Int
+        var WarriorProgramStatus : Bool
+        var WarriorProcessStatus : Bool
+        var WarriorCurrentCoreAddress : Int
+        
+    }
+    
+    var CoreCycles = 1000
     var CoreRunning = false
-    var CoreSize:Int = 8000
-    var CoreCurrentAddress:Int = 0
-    var CoreCurrentInstruction:RedCodeInstruction = RedCodeInstruction.init()
+    var CoreSize: Int = 8000
+    
+    var CoreCurrentProcessIndex : Int = 0
+    
+    var Warriors : Array<Warrior>
+    var CoreWarriorQueue : Array<WarriorQueue>
+    
     @Published var Core : Array<RedCodeInstruction>
     
     init() {
         self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreSize)
+        self.Warriors = []
+        self.CoreWarriorQueue = []
     }
     
     func FormatCoreOutput(_ PassedCurrentAddress : Int) -> String {
@@ -145,12 +164,48 @@ class EmulatorCore : ObservableObject {
     
     func LoadCore() {
         
-        Core[CoreCurrentAddress].OpCode = RedCodeInstructionType.MOV
-        Core[CoreCurrentAddress].AfieldAddress = 0
-        Core[CoreCurrentAddress].AfieldAddressMode = RedCodeAddressMode.Direct
-        Core[CoreCurrentAddress].BfieldAddress = 1
-        Core[CoreCurrentAddress].BfieldAddressMode = RedCodeAddressMode.Direct
+        var TempRedCoreInstruction : Array<RedCodeInstruction> = []
+        var TempCoreStartAddress : Int
         
+        //TempCoreStartAddress = Int.random(in: 0...CoreSize)
+        //TempCoreStartAddress = Int.random(in: 0...30)
+        TempCoreStartAddress = 23
+        
+        TempRedCoreInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 1,InstructionColour : .green))
+        
+        Warriors.append(Warrior(WarriorProgramID:0,WarriorProgramTitle:"Barry the IMP",WarriorCode:TempRedCoreInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .green))
+        CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 0, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
+        Core[TempCoreStartAddress] = TempRedCoreInstruction[0]
+        
+        //TempCoreStartAddress = Int.random(in: 0...CoreSize)
+        //TempCoreStartAddress = Int.random(in: 0...30)
+        TempCoreStartAddress = 28
+        
+        TempRedCoreInstruction = []
+        
+        //        ADD #4, 3        ; execution begins here
+        //        MOV 2, @2
+        //        JMP -2
+        //        DAT #0, #0
+        
+        TempRedCoreInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.ADD,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:4,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 3,InstructionColour : .red))
+        TempRedCoreInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:2,BfieldAddressMode : RedCodeAddressMode.Indirect,BfieldAddress : 2,InstructionColour : .red))
+        TempRedCoreInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.JMP,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:-2,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 0,InstructionColour : .red))
+        TempRedCoreInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.DAT,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Immediate,BfieldAddress : 0,InstructionColour : .red))
+        
+        Warriors.append(Warrior(WarriorProgramID:1,WarriorProgramTitle:"Kevin the Dwarf",WarriorCode:TempRedCoreInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .red))
+        CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 1, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
+        Core[TempCoreStartAddress] = TempRedCoreInstruction[0]
+        Core[TempCoreStartAddress+1] = TempRedCoreInstruction[1]
+        Core[TempCoreStartAddress+2] = TempRedCoreInstruction[2]
+        Core[TempCoreStartAddress+3] = TempRedCoreInstruction[3]
+       
+    }
+    
+    func ResetCore() {
+        self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreSize)
+        self.Warriors = []
+        self.CoreWarriorQueue = []
     }
     
     func CoreRunMode(_ PassedRunMode : Bool ) {
@@ -159,27 +214,36 @@ class EmulatorCore : ObservableObject {
         
     }
     
-    func CoreWrapAddress ( _ PassedCurrentAddress : Int, _ PassedAddressIncrement : Int, _ PassedCoreSize : Int ) -> Int {
+    func SetCoreCycles(_ PassedRunCycles : Int ) {
+        
+        CoreCycles = PassedRunCycles
+        
+    }
     
+    func CoreWrapAddress ( _ PassedCurrentAddress : Int, _ PassedAddressIncrement : Int, _ PassedCoreSize : Int ) -> Int {
+        
         var NewAddress : Int
         
         if PassedCurrentAddress+PassedAddressIncrement > PassedCoreSize-1
         {
-           NewAddress = PassedAddressIncrement-(CoreSize-PassedCurrentAddress)
+            NewAddress = PassedAddressIncrement-(CoreSize-PassedCurrentAddress)
         }
         else
         {
-           NewAddress = PassedCurrentAddress+PassedAddressIncrement
+            NewAddress = PassedCurrentAddress+PassedAddressIncrement
         }
         return NewAddress
-
+        
     }
     
     func CoreExecute()  {
         
-        while CoreRunning == true {
-            
-            Core[CoreCurrentAddress].InstructionColour = .red
+        var CoreCurrentAddress: Int = 0
+        var CoreCurrentInstruction:RedCodeInstruction = RedCodeInstruction.init()
+        
+        for LoopIndex in (1...CoreCycles)
+        {
+            CoreCurrentAddress = CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress
             CoreCurrentInstruction = Core[CoreCurrentAddress]
             switch CoreCurrentInstruction.OpCode {
             case .DAT:
@@ -189,6 +253,7 @@ class EmulatorCore : ObservableObject {
                 Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].OpCode = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].OpCode
                 Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].AfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].AfieldAddress
                 Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].BfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].BfieldAddress
+                Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].InstructionColour = CoreCurrentInstruction.InstructionColour
             case .ADD:
                 print("ADD")
             case .SUB:
@@ -224,17 +289,86 @@ class EmulatorCore : ObservableObject {
             case .NOP:
                 print("NOP")
             }
-           // Core[CoreCurrentAddress].InstructionColour = .black
-            CoreCurrentAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
-            if CoreCurrentAddress == 30 {
-                CoreRunning == false
-                break
+            CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
+            CoreCurrentProcessIndex = CoreCurrentProcessIndex+1
+            if CoreCurrentProcessIndex == CoreWarriorQueue.count
+            {
+                CoreCurrentProcessIndex = 0
             }
         }
+    }
+    
+    func CoreStepExecute()  {
         
+        var CoreCurrentAddress: Int = 0
+        var CoreCurrentInstruction:RedCodeInstruction = RedCodeInstruction.init()
+        
+        CoreCurrentAddress = CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress
+        CoreCurrentInstruction = Core[CoreCurrentAddress]
+        switch CoreCurrentInstruction.OpCode {
+        case .DAT:
+            print("Bang! Warrior "+String(CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramID)+" is dead")
+        case .MOV:
+            print("MOV")
+            
+            //switch CoreCurrentInstruction.AfieldAddressMode
+            //{
+           // case .Direct:
+                
+           // case .Immediate :
+                
+          //  case .Indirect :
+                
+           // }
+            Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].OpCode = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].OpCode
+            Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].AfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].AfieldAddress
+            Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].BfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].BfieldAddress
+            Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].InstructionColour = CoreCurrentInstruction.InstructionColour
+        case .ADD:
+            print("Error: ADD is not implemented")
+        case .SUB:
+            print("Error: SUB is not implemented")
+        case .MUL:
+            print("Error: MUL is not implemented")
+        case .DIV:
+            print("Error: DIV is not implemented")
+        case .MOD:
+            print("Error: MOD is not implemented")
+        case .JMP:
+            print("Error: JMP is not implemented")
+        case .JMZ:
+            print("Error: JMZ is not implemented")
+        case .JMN:
+            print("Error: JMN is not implemented")
+        case .DJN:
+            print("Error: DJN is not implemented")
+        case .SPL:
+            print("Error: SPL is not implemented")
+        case .CMP:
+            print("Error: CMP is not implemented")
+        case .SEQ:
+            print("Error: SEQ is not implemented")
+        case .SNE:
+            print("Error: SNE is not implemented")
+        case .SLT:
+            print("Error: SLT is not implemented")
+        case .LDP:
+            print("Error: LDP is not implemented")
+        case .STP:
+            print("Error: STP is not implemented")
+        case .NOP:
+            print("Error: NOP is not implemented")
+        }
+        CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
+        CoreCurrentProcessIndex = CoreCurrentProcessIndex+1
+        if CoreCurrentProcessIndex == CoreWarriorQueue.count
+        {
+            CoreCurrentProcessIndex = 0
+        }
     }
 }
 
-   
-    
-    
+
+
+
+
