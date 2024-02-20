@@ -73,8 +73,8 @@ class EmulatorCore : ObservableObject {
     var CoreCycles = 1000
     var CoreRunning = false
     var CoreSize: Int = 8000
-    var CoreSizeInRows: Int = 25
-    var CoreSizeInCols: Int = 20
+    var CoreSizeInRows: Int = 80
+    var CoreSizeInCols: Int = 100
     
     var CoreCurrentProcessIndex : Int = 0
     

@@ -10,7 +10,10 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject var ThisEmulatorCore = EmulatorCore()
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    //var CoreUpdateFreq : Double = 0.1
+    
+    let timer = Timer.publish(every: 0.001, on: .main, in: .common).autoconnect()
     
     var body: some View {
         Spacer()
@@ -60,9 +63,12 @@ struct ContentView: View {
                 Button("Reset Core") {
                     ThisEmulatorCore.ResetCore()
                 }
-                Button("Step Through Core") {
-                    ThisEmulatorCore.CoreStepExecute()
+                .onReceive(timer) { timerthingy in
+                    //Button("Step Through Core")
+                    if ThisEmulatorCore.Warriors.count > 0 && ThisEmulatorCore.CoreRunning {
+                        ThisEmulatorCore.CoreStepExecute()}
                 }
+                //}
             }
             Spacer()
         }

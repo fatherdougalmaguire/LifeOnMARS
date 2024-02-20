@@ -206,6 +206,21 @@
                   endingLineNumber = "306"
                   offsetFromSymbolStart = "156">
                </Location>
+               <Location
+                  uuid = "71D2A159-FB2A-4D56-BFAA-AB00F5B9498A - 311574420402aa0d"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "LifeOnMars.EmulatorCore.CoreStepExecute() -&gt; ()"
+                  moduleName = "LifeOnMars"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "314"
+                  endingLineNumber = "314"
+                  offsetFromSymbolStart = "156">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
