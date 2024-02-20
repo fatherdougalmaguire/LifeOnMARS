@@ -10,10 +10,22 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject var ThisEmulatorCore = EmulatorCore()
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         Spacer()
         HStack {
+            Spacer()
+            Grid(horizontalSpacing: 1.0, verticalSpacing: 1.0) {
+                ForEach(0..<ThisEmulatorCore.CoreSizeInRows) { MyIndexRow in
+                    GridRow {
+                        ForEach(0..<ThisEmulatorCore.CoreSizeInCols) { MyIndexCol in
+                            Rectangle().fill(ThisEmulatorCore.Core[(MyIndexRow*ThisEmulatorCore.CoreSizeInCols)+MyIndexCol].InstructionColour)
+                        }
+                    }
+                    .frame(width: 10.0, height: 10.0)
+                }
+            }
             Spacer()
             ScrollView {
                 VStack(alignment: .leading) {
@@ -54,17 +66,6 @@ struct ContentView: View {
             }
             Spacer()
         }
-        //       VStack {
-        //            ForEach(1..<25) { Vindex in
-        //                HStack {
-        //                    ForEach(1..<25) { Hindex in
-        //                        Rectangle()
-        //                            .fill(.red)
-        //                            .aspectRatio(1.0, contentMode: .fit)
-        //                    }
-        //                }
-        //            }
-        //        }
         Spacer()
     }
 }

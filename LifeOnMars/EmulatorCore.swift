@@ -12,31 +12,33 @@ import SwiftUI
 class EmulatorCore : ObservableObject {
     
     enum RedCodeInstructionType {
-        case DAT   // data (kills the process)
-        case MOV   // move (copies data from one address to another)
-        case ADD   // add (adds one number to another)
-        case SUB   // subtract (subtracts one number from another)
+        case DAT   //   DAT             B   Initialize location to value B.
+        case MOV   //   MOV     A       B   Move A into location B.
+        case ADD   //   ADD     A       B   Add  operand  A  to   contents  of location  B  and  store  result in location B.
+        case SUB   //   SUB     A       B   Subtract operand  A  from contents of location  B and store result in location B.
         case MUL   // multiply (multiplies one number with another)
         case DIV   // divide (divides one number with another)
         case MOD   // modulus (divides one number with another and gives the remainder)
-        case JMP   // jump (continues execution from another address)
-        case JMZ   // jump if zero (tests a number and jumps to an address if it's 0)
+        case JMP   //   JMP             B   Jump to location B.
+        case JMZ   //   JMZ     A       B   If operand A is  0, jump  to location  B;  otherwise  continue with next instruction.
         case JMN   // jump if not zero (tests a number and jumps if it isn't 0)
+        case DJZ   //   DJZ     A       B   Decrement contents  of  location A by 1.  If location  A now holds 0, jump  to   location  B;  otherwise continue with next instruction.
         case DJN   // decrement and jump if not zero (decrements a number by one, and jumps unless the result is 0)
         case SPL   // split (starts a second process at another address)
-        case CMP   // compare (same as SEQ)
+        case CMP   //   CMP     A       B   Compare operand  A with operand B. If they  are not  equal, skip next instruction;   otherwise  continue with next instruction.
         case SEQ   // skip if equal (compares two instructions, and skips the next instruction if they are equal)
         case SNE   // skip if not equal (compares two instructions, and skips the next instruction if they aren't equal)
         case SLT   // skip if lower than (compares two values, and skips the next instruction if the first is lower than the second)
         case LDP   // load from p-space (loads a number from private storage space)
         case STP   // save to p-space (saves a number to private storage space)
         case NOP   // no operation (does nothing)
+    
     }
     
     enum RedCodeAddressMode {
-        case Immediate   // #
-        case Direct      // $ or nothing
-        case Indirect    // @
+        case Immediate   // #               The number  following  this symbol is the operand.
+        case Direct      // $ or nothing    The  number  specifies  an  offset from the current instruction. Mars adds the  offset to the address of the current  instruction; the number stored at the location reached in this way is the operand.
+        case Indirect    // @               The number  following  this symbol specifies an  offset from the current  instruction  to  a  location where the  relative address of theoperand is  found.  Mars  adds the offset to  the address of the current instruction and retrieves the number stored at the specified location; this number is then interpreted as  an offset  from its own address. The number found  at this second location is the operand.
     }
     
     struct RedCodeInstruction {
@@ -71,6 +73,8 @@ class EmulatorCore : ObservableObject {
     var CoreCycles = 1000
     var CoreRunning = false
     var CoreSize: Int = 8000
+    var CoreSizeInRows: Int = 25
+    var CoreSizeInCols: Int = 20
     
     var CoreCurrentProcessIndex : Int = 0
     
@@ -116,6 +120,8 @@ class EmulatorCore : ObservableObject {
         case .JMN:
             FormattedString = FormattedString+"JMN"
         case .DJN:
+            FormattedString = FormattedString+"DJN"
+        case .DJZ:
             FormattedString = FormattedString+"DJN"
         case .SPL:
             FormattedString = FormattedString+"SPL"
@@ -272,6 +278,8 @@ class EmulatorCore : ObservableObject {
                 print("JMN")
             case .DJN:
                 print("DJN")
+            case .DJZ:
+                print("DJZ")
             case .SPL:
                 print("SPL")
             case .CMP:
@@ -311,15 +319,15 @@ class EmulatorCore : ObservableObject {
         case .MOV:
             print("MOV")
             
-            //switch CoreCurrentInstruction.AfieldAddressMode
-            //{
-           // case .Direct:
-                
-           // case .Immediate :
-                
-          //  case .Indirect :
-                
-           // }
+        switch CoreCurrentInstruction.AfieldAddressMode
+        {
+        case .Direct:
+            print("Direct")
+        case .Immediate :
+            print("Immediate")
+        case .Indirect :
+            print("Indirect")
+        }
             Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].OpCode = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].OpCode
             Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].AfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].AfieldAddress
             Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.BfieldAddress,CoreSize)].BfieldAddress = Core[CoreWrapAddress(CoreCurrentAddress,CoreCurrentInstruction.AfieldAddress,CoreSize)].BfieldAddress
@@ -342,6 +350,8 @@ class EmulatorCore : ObservableObject {
             print("Error: JMN is not implemented")
         case .DJN:
             print("Error: DJN is not implemented")
+        case .DJZ:
+            print("Error: DJZ is not implemented")
         case .SPL:
             print("Error: SPL is not implemented")
         case .CMP:
