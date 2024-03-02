@@ -13,5 +13,15 @@ struct LifeOnMarsApp: App {
         WindowGroup {
             ContentView()
         }
+        .commands
+        {
+            CommandGroup(replacing: .help) {
+                Link("Core Wars Reference Guide", destination: URL(string: "https://corewar-docs.readthedocs.io/en/latest/")!)
+                Divider()
+            }
+            CommandGroup(after: .help) {
+                Link("Hello to Jason Isaacs", destination: URL(string: "https://www.kermodeandmayo.com")!)
+            }
+        }
     }
 }

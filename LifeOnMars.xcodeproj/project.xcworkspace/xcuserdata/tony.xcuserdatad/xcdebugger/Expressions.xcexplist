@@ -18,6 +18,17 @@
       </ContextState>
       <ContextState
          contextName = "EmulatorCore.LoadCore():EmulatorCore.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)]">
+            </PersistentString>
+            <PersistentString
+               value = "Warriors[0].WarriorCode.count">
+            </PersistentString>
+            <PersistentString
+               value = "Warriors[1].WarriorCode.count">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "EmulatorCore.CoreStepExecute():EmulatorCore.swift">
