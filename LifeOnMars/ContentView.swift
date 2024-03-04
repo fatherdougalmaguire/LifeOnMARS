@@ -11,9 +11,7 @@ struct ContentView: View {
     
     @StateObject var ThisEmulatorCore = EmulatorCore()
     
-    let CoreUpdateFreq : Double = 0.1
-    
-    let timer = Timer.publish(every: 0.001, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 0.01 , on: .main, in: .common).autoconnect()
     
     var body: some View {
         Spacer()
@@ -26,57 +24,71 @@ struct ContentView: View {
                         GridRow {
                             ForEach(0..<ThisEmulatorCore.CoreSizeInCols) { MyIndexCol in
                                 Rectangle().fill(ThisEmulatorCore.Core[(MyIndexRow*ThisEmulatorCore.CoreSizeInCols)+MyIndexCol].InstructionColour)
-                            }
-                        }
+                            } // End ForEach
+                        } // End GridRow
                         .frame(width: 15.0, height: 15.0)
-                    }
-                }
+                    } // End ForEach
+                } // End Grid
                 Spacer()
                 List {
                     ForEach(0..<ThisEmulatorCore.CoreSize) { MyIndex in Text(ThisEmulatorCore.FormatCoreOutput(MyIndex)).monospaced().foregroundColor(ThisEmulatorCore.Core[MyIndex].InstructionColour)
-                    }
-                }
-            }
+                    } // End ForEach
+                } // End List
+            } // End Vstack
             Spacer()
-            VStack(alignment: .leading) {
-                List  {
-                    VStack(alignment: .leading) {
-                        if ThisEmulatorCore.Warriors.count > 0 {
-                            ForEach(0..<ThisEmulatorCore.Warriors.count) { MyIndex in
-                                Text(ThisEmulatorCore.Warriors[MyIndex].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[MyIndex].WarriorStartCoreAddress))
-                                    .foregroundColor(ThisEmulatorCore.Warriors[MyIndex].WarriorColour)
-                            }
+            VStack {
+                VStack {
+                    if ThisEmulatorCore.Warriors.count > 0 {
+                    List {
+                        ForEach(0..<ThisEmulatorCore.Warriors.count) { item in
+                            Toggle(isOn: $ThisEmulatorCore.CoreWarriorQueue[item].WarriorProgramStatus)  {Text(ThisEmulatorCore.Warriors[item].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[item].WarriorStartCoreAddress)).foregroundColor(ThisEmulatorCore.Warriors[item].WarriorColour)}.toggleStyle(.switch).disabled(true)
+                        } // For Each
+                        }  // End List
+                    }  // End If
+                    else {
+                        List {
+                            Text("No warriors loaded")
+                            Spacer()
                         }
+                       
                     }
-                }
-            
-            
-                    Button("Start Battle") {
+                } // End VStack
+                VStack {
+                    Button("Start Battle")
+                    {
                         ThisEmulatorCore.SetCoreCycles(1000)
                         ThisEmulatorCore.CoreRunMode(true)
-                        //ThisEmulatorCore.CoreExecute()
                     }
-                    Button("End Battle") {
+                    .buttonStyle(.borderedProminent)
+                    Button("End Battle")
+                    {
                         ThisEmulatorCore.CoreRunMode(false)
                     }
-                    Button("Load Warriors") {
+                    .buttonStyle(.borderedProminent)
+                    Button("Load Warriors", action:
+                            {
                         ThisEmulatorCore.SetCoreCycles(1000)
                         ThisEmulatorCore.LoadCore()
-                    }
-                    Button("Reset Core") {
+                    })
+                    .buttonStyle(.borderedProminent)
+                    Button("Reset Core")
+                    {
                         ThisEmulatorCore.ResetCore()
                     }
+                    .buttonStyle(.borderedProminent)
                     .onReceive(timer) { timerthingy in
                         if ThisEmulatorCore.Warriors.count > 0 && ThisEmulatorCore.CoreRunning {
                             ThisEmulatorCore.CoreStepExecute()}
                     }
+                    Spacer()
+                } //End Vstack
             }
-            Spacer()
-        }
+        }  // End Hstack
+        .background(Color.white)
         Spacer()
-    }
-}
+    } // End body
+}  // End ContentView
 
 #Preview {
     ContentView()
-}
+}  // End Preview

@@ -24,15 +24,24 @@ class EmulatorCore : ObservableObject {
         case JMN   // jump if not zero (tests a number and jumps if it isn't 0)
         case DJZ   //   DJZ     A       B   Decrement contents  of  location A by 1.  If location  A now holds 0, jump  to   location  B;  otherwise continue with next instruction.
         case DJN   // decrement and jump if not zero (decrements a number by one, and jumps unless the result is 0)
-        case SPL   // split (starts a second process at another address)
         case CMP   //   CMP     A       B   Compare operand  A with operand B. If they  are not  equal, skip next instruction;   otherwise  continue with next instruction.
         case SEQ   // skip if equal (compares two instructions, and skips the next instruction if they are equal)
         case SNE   // skip if not equal (compares two instructions, and skips the next instruction if they aren't equal)
         case SLT   // skip if lower than (compares two values, and skips the next instruction if the first is lower than the second)
-        case LDP   // load from p-space (loads a number from private storage space)
-        case STP   // save to p-space (saves a number to private storage space)
+       // case LDP   // load from p-space (loads a number from private storage space)
+       // case STP   // save to p-space (saves a number to private storage space)
         case NOP   // no operation (does nothing)
-        
+        case SPL  //  SPL   A       The spl instruction spawns a new process for the current warrior at the address specified by the A operand.
+    }
+    
+    enum RedCodeModifier {
+        case DotA   //      .a    A operand    A operand
+        case DotB   //      .b    B operand    B operand
+        case DotAB  //      .ab    A operand    B operand
+        case DotBA  //      .ba    B operand    A operand
+        case DotF   //      .f    A and B operands    A and B operands
+        case DotX   //      .x    A and B operands    B and A operands
+        case DotI   //      .i    Whole instruction    Whole instruction
     }
     
     enum RedCodeAddressMode {
@@ -44,6 +53,7 @@ class EmulatorCore : ObservableObject {
     struct RedCodeInstruction {
         
         var OpCode:RedCodeInstructionType = RedCodeInstructionType.DAT
+        var Modifier : RedCodeModifier = RedCodeModifier.DotF
         var AfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Immediate
         var AfieldAddress:Int = 0
         var BfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Immediate
@@ -53,6 +63,7 @@ class EmulatorCore : ObservableObject {
     }
     
     struct Warrior {
+        
         var WarriorProgramID : Int
         var WarriorProgramTitle : String
         var WarriorCode : Array<RedCodeInstruction>
@@ -72,10 +83,11 @@ class EmulatorCore : ObservableObject {
     
     var CoreCycles: Int = 1000
     var CoreRunning = false
-    var CoreSize: Int = 800
+    var CoreSize: Int = 99
     var CoreSizeInRows: Int
     var CoreSizeInCols: Int
     var CoreDrawSize : Int
+    var CoreUpdateFreq : Double = 0.1
     
     var CoreCurrentProcessIndex : Int = 0
     
@@ -108,6 +120,7 @@ class EmulatorCore : ObservableObject {
         for MyIndex in 0..<CoreSize {
             self.Core[MyIndex].InstructionColour = .black
         }
+        self.CoreUpdateFreq = 0.1
     }
     
     func FormatCoreOutput(_ PassedCurrentAddress : Int) -> String {
@@ -140,12 +153,10 @@ class EmulatorCore : ObservableObject {
             FormattedString = FormattedString+"JMZ"
         case .JMN:
             FormattedString = FormattedString+"JMN"
+        case .DJZ:
+            FormattedString = FormattedString+"DJZ"
         case .DJN:
             FormattedString = FormattedString+"DJN"
-        case .DJZ:
-            FormattedString = FormattedString+"DJN"
-        case .SPL:
-            FormattedString = FormattedString+"SPL"
         case .CMP:
             FormattedString = FormattedString+"CMP"
         case .SEQ:
@@ -154,16 +165,37 @@ class EmulatorCore : ObservableObject {
             FormattedString = FormattedString+"SNE"
         case .SLT:
             FormattedString = FormattedString+"SLT"
-        case .LDP:
-            FormattedString = FormattedString+"LDP"
-        case .STP:
-            FormattedString = FormattedString+"STP"
         case .NOP:
             FormattedString = FormattedString+"NOP"
+        case .SPL:
+            FormattedString = FormattedString+"SPL"
+        }
+        
+       switch CurrentRedCodeInstruction.Modifier {
+       case .DotA:
+           FormattedString = FormattedString+".A"
+       case .DotB:
+           FormattedString = FormattedString+".B"
+       case .DotAB:
+           FormattedString = FormattedString+".AB"
+       case .DotBA:
+           FormattedString = FormattedString+".BA"
+       case .DotF:
+           FormattedString = FormattedString+".F"
+       case .DotX:
+           FormattedString = FormattedString+".X"
+       case .DotI:
+           FormattedString = FormattedString+".I"
+       }
+        
+        print(FormattedString.count)
+        
+        if FormattedString.count == 15 {
+            FormattedString = FormattedString + " "
         }
         
         FormattedString = FormattedString + "    "
-        
+
         switch CurrentRedCodeInstruction.AfieldAddressMode {
         case .Immediate:
             FormattedString = FormattedString+"#"
@@ -194,69 +226,70 @@ class EmulatorCore : ObservableObject {
         var TempRedCodeInstruction : Array<RedCodeInstruction> = []
         var TempCoreStartAddress : Int
         var WarriorCollision = Array<Bool>(repeating: false,count:CoreDrawSize)
-        //var WarriorIndex : Int
         var WarriorCollisionFlag : Bool
         
-        //      MOV 0, 1
-        
-        TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
-        //TempCoreStartAddress = 0
-        
-        TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 1,InstructionColour : .green))
-        
-        Warriors.append(Warrior(WarriorProgramID:0,WarriorProgramTitle:"Barry the IMP",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .green))
-        
-        for WarriorIndex in 0...Warriors[0].WarriorCode.count-1 {
-            WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)] = true
-        }
-        
-        CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 0, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
-        Core[TempCoreStartAddress] = TempRedCodeInstruction[0]
-        
-        TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
-        //TempCoreStartAddress = CoreSize-1
-        
-        TempRedCodeInstruction = []
-        
-        //        ADD #4, 3        ; execution begins here
-        //        MOV 2, @2
-        //        JMP -2
-        //        DAT #0, #0
-        
-        TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.ADD,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:4,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 3,InstructionColour : .red))
-        TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:2,BfieldAddressMode : RedCodeAddressMode.Indirect,BfieldAddress : 2,InstructionColour : .red))
-        TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.JMP,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:-2,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 0,InstructionColour : .red))
-        TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.DAT,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Immediate,BfieldAddress : 0,InstructionColour : .red))
-        
-        Warriors.append(Warrior(WarriorProgramID:1,WarriorProgramTitle:"Kevin the Dwarf",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .red))
-        
-        repeat
-        {
-            WarriorCollisionFlag = false
-            for WarriorIndex in 0...TempRedCodeInstruction.count
+        if Warriors.count == 0 {
+            TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
+            //TempCoreStartAddress = 0
+            
+            //      MOV 0, 1
+            
+            TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,Modifier : RedCodeModifier.DotI,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 1,InstructionColour : .green))
+            
+            Warriors.append(Warrior(WarriorProgramID:0,WarriorProgramTitle:"Barry the IMP",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .green))
+            
+            for WarriorIndex in 0...Warriors[0].WarriorCode.count-1 {
+                WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)] = true
+            }
+            
+            CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 0, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
+            Core[TempCoreStartAddress] = TempRedCodeInstruction[0]
+            
+            TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
+            //TempCoreStartAddress = CoreSize-1
+            
+            TempRedCodeInstruction = []
+            
+            //        ADD #4, 3        ; execution begins here
+            //        MOV 2, @2
+            //        JMP -2
+            //        DAT #0, #0
+            
+            TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.ADD,Modifier : RedCodeModifier.DotAB,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:4,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 3,InstructionColour : .red))
+            TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,Modifier : RedCodeModifier.DotI,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:2,BfieldAddressMode : RedCodeAddressMode.Indirect,BfieldAddress : 2,InstructionColour : .red))
+            TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.JMP,Modifier : RedCodeModifier.DotB,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:-2,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 0,InstructionColour : .red))
+            TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.DAT,Modifier : RedCodeModifier.DotI,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Immediate,BfieldAddress : 0,InstructionColour : .red))
+            
+            Warriors.append(Warrior(WarriorProgramID:1,WarriorProgramTitle:"Kevin the Dwarf",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .red))
+            
+            repeat
             {
-                if WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)]
+                WarriorCollisionFlag = false
+                for WarriorIndex in 0...TempRedCodeInstruction.count
                 {
-                    WarriorCollisionFlag = true
+                    if WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)]
+                    {
+                        WarriorCollisionFlag = true
+                    }
+                }
+                if WarriorCollisionFlag
+                {
+                    TempCoreStartAddress = Int.random(in: 0...CoreSize)
                 }
             }
-            if WarriorCollisionFlag
+            while WarriorCollisionFlag
+                    
+                    CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 1, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
+                    
+                    Core[TempCoreStartAddress] = TempRedCodeInstruction[0]
+                    Core[CoreWrapAddress(TempCoreStartAddress,1,CoreSize)] = TempRedCodeInstruction[1]
+                    Core[CoreWrapAddress(TempCoreStartAddress,2,CoreSize)] = TempRedCodeInstruction[2]
+                    Core[CoreWrapAddress(TempCoreStartAddress,3,CoreSize)] = TempRedCodeInstruction[3]
+                    
+                    for WarriorIndex in 0...Warriors[1].WarriorCode.count-1
             {
-                TempCoreStartAddress = Int.random(in: 0...CoreSize)
+                WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)] = true
             }
-        }
-        while WarriorCollisionFlag
-            
-        CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 1, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
-        
-        Core[TempCoreStartAddress] = TempRedCodeInstruction[0]
-        Core[CoreWrapAddress(TempCoreStartAddress,1,CoreSize)] = TempRedCodeInstruction[1]
-        Core[CoreWrapAddress(TempCoreStartAddress,2,CoreSize)] = TempRedCodeInstruction[2]
-        Core[CoreWrapAddress(TempCoreStartAddress,3,CoreSize)] = TempRedCodeInstruction[3]
-                
-        for WarriorIndex in 0...Warriors[1].WarriorCode.count-1
-        {
-            WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)] = true
         }
     }
     
@@ -308,6 +341,7 @@ class EmulatorCore : ObservableObject {
         switch CoreCurrentInstruction.OpCode {
         case .DAT:
             print("Bang! Warrior "+String(CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramID)+" is dead")
+            CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramStatus = false
         case .MOV:
             print("MOV")
             
@@ -340,12 +374,10 @@ class EmulatorCore : ObservableObject {
             print("Error: JMZ is not implemented")
         case .JMN:
             print("Error: JMN is not implemented")
-        case .DJN:
-            print("Error: DJN is not implemented")
         case .DJZ:
             print("Error: DJZ is not implemented")
-        case .SPL:
-            print("Error: SPL is not implemented")
+        case .DJN:
+            print("Error: DJN is not implemented")
         case .CMP:
             print("Error: CMP is not implemented")
         case .SEQ:
@@ -354,12 +386,14 @@ class EmulatorCore : ObservableObject {
             print("Error: SNE is not implemented")
         case .SLT:
             print("Error: SLT is not implemented")
-        case .LDP:
-            print("Error: LDP is not implemented")
-        case .STP:
-            print("Error: STP is not implemented")
+//        case .LDP:
+ //           print("Error: LDP is not implemented")
+//        case .STP:
+//            print("Error: STP is not implemented")
         case .NOP:
             print("Error: NOP is not implemented")
+        case .SPL:
+            print("Error: SPL is not implemented")
         }
         CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
         CoreCurrentProcessIndex = CoreCurrentProcessIndex+1
