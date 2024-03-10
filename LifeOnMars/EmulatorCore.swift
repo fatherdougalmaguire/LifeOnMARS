@@ -2,7 +2,9 @@
 //  EmulatorCore.swift
 //  LifeOnMARS
 //
-//  Created by Antonio Sanchez-Rivas on 3/2/2024.
+//  Created by Antonio Sanchez-Rivas on 10/2/2024.
+//  Version 0.1 3/3/2024
+//  Version 0.2 10/3/2024
 //
 // MARS (Memory Array Redcode Simulator) emulator core in Swift
 
