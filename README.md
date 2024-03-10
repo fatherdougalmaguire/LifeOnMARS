@@ -8,6 +8,8 @@ Why ?
 
 Because it seems interesting and I wanted to dive into the world of GUI coding
 
+and hello to Jason Isaacs
+
 (c) 2024 Tony Sanchez
 
-and hello to Jason Isaacs
+
