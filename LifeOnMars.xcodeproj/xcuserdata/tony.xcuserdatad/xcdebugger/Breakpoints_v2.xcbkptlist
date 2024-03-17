@@ -14,8 +14,8 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "228"
-            endingLineNumber = "228"
+            startingLineNumber = "257"
+            endingLineNumber = "257"
             landmarkName = "LoadCore()"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,57 +30,10 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "337"
-            endingLineNumber = "337"
+            startingLineNumber = "431"
+            endingLineNumber = "431"
             landmarkName = "CoreStepExecute()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "71D2A159-FB2A-4D56-BFAA-AB00F5B9498A - 311574420402a9f3"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.CoreStepExecute() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "304"
-                  endingLineNumber = "304"
-                  offsetFromSymbolStart = "156">
-               </Location>
-               <Location
-                  uuid = "71D2A159-FB2A-4D56-BFAA-AB00F5B9498A - 311574420402a935"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.CoreStepExecute() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "306"
-                  endingLineNumber = "306"
-                  offsetFromSymbolStart = "156">
-               </Location>
-               <Location
-                  uuid = "71D2A159-FB2A-4D56-BFAA-AB00F5B9498A - 311574420402aa0d"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.CoreStepExecute() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "314"
-                  endingLineNumber = "314"
-                  offsetFromSymbolStart = "156">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -93,8 +46,8 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "402"
-            endingLineNumber = "402"
+            startingLineNumber = "854"
+            endingLineNumber = "854"
             landmarkName = "CoreStepExecute()"
             landmarkType = "7">
          </BreakpointContent>
@@ -109,8 +62,8 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "400"
-            endingLineNumber = "400"
+            startingLineNumber = "851"
+            endingLineNumber = "851"
             landmarkName = "CoreStepExecute()"
             landmarkType = "7">
          </BreakpointContent>
@@ -125,102 +78,10 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "284"
-            endingLineNumber = "284"
+            startingLineNumber = "313"
+            endingLineNumber = "313"
             landmarkName = "LoadCore()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57ca29"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "228"
-                  endingLineNumber = "228"
-                  offsetFromSymbolStart = "3284">
-               </Location>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57ca29"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "228"
-                  endingLineNumber = "228"
-                  offsetFromSymbolStart = "2816">
-               </Location>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57ca29"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "228"
-                  endingLineNumber = "228"
-                  offsetFromSymbolStart = "2840">
-               </Location>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57ca16"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "229"
-                  endingLineNumber = "229"
-                  offsetFromSymbolStart = "2852">
-               </Location>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57c49a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "241"
-                  endingLineNumber = "241"
-                  offsetFromSymbolStart = "2212">
-               </Location>
-               <Location
-                  uuid = "3E4D4DF2-4CD5-496E-86A4-377037B13BFA - 52abb96bdc57c7a4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "247"
-                  endingLineNumber = "247"
-                  offsetFromSymbolStart = "2452">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -233,8 +94,8 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "285"
-            endingLineNumber = "285"
+            startingLineNumber = "314"
+            endingLineNumber = "314"
             landmarkName = "LoadCore()"
             landmarkType = "7">
          </BreakpointContent>
@@ -249,42 +110,10 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "250"
-            endingLineNumber = "250"
+            startingLineNumber = "279"
+            endingLineNumber = "279"
             landmarkName = "LoadCore()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "711E9420-3AB0-40F8-ABFD-8B6D4639BC03 - 52abb96bdc57caad"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "224"
-                  endingLineNumber = "224"
-                  offsetFromSymbolStart = "1844">
-               </Location>
-               <Location
-                  uuid = "711E9420-3AB0-40F8-ABFD-8B6D4639BC03 - 52abb96bdc57ca8a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.LoadCore() -&gt; ()"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "225"
-                  endingLineNumber = "225"
-                  offsetFromSymbolStart = "1620">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -297,8 +126,8 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "82"
-            endingLineNumber = "82"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
             landmarkName = "WarriorQueue"
             landmarkType = "14">
          </BreakpointContent>
@@ -313,42 +142,26 @@
             filePath = "LifeOnMars/EmulatorCore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "196"
-            endingLineNumber = "196"
+            startingLineNumber = "205"
+            endingLineNumber = "205"
             landmarkName = "FormatCoreOutput(_:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "DF30751B-087A-4D44-BE4D-0039A0913715 - 34eac17df4a603a9"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.FormatCoreOutput(Swift.Int) -&gt; Swift.String"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "192"
-                  endingLineNumber = "192"
-                  offsetFromSymbolStart = "6144">
-               </Location>
-               <Location
-                  uuid = "DF30751B-087A-4D44-BE4D-0039A0913715 - 34eac17df4a6026f"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "LifeOnMars.EmulatorCore.FormatCoreOutput(Swift.Int) -&gt; Swift.String"
-                  moduleName = "LifeOnMars"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/tony/Documents/GitHub/LifeOnMars/LifeOnMars/EmulatorCore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "194"
-                  endingLineNumber = "194"
-                  offsetFromSymbolStart = "6328">
-               </Location>
-            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2D275687-6ECC-4DB7-96FE-E377553B4CE0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LifeOnMars/EmulatorCore.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "442"
+            endingLineNumber = "442"
+            landmarkName = "CoreStepExecute()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
