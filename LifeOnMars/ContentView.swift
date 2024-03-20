@@ -11,6 +11,7 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject var ThisEmulatorCore = EmulatorCore()
+    @State var isHover = false
     
     let timer = Timer.publish(every: 0.01 , on: .main, in: .common).autoconnect()
     
@@ -44,7 +45,8 @@ struct ContentView: View {
                         ForEach(0..<ThisEmulatorCore.Warriors.count, id: \.self) { item in
                             Toggle(isOn: $ThisEmulatorCore.CoreWarriorQueue[item].WarriorProgramStatus)  {Text(ThisEmulatorCore.Warriors[item].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[item].WarriorStartCoreAddress)).foregroundColor(ThisEmulatorCore.Warriors[item].WarriorColour)}.toggleStyle(.switch).disabled(true)
                         } // For Each
-                        }  // End List
+                    } .onHover { hover in
+                        isHover = hover }  // End List
                     }  // End If
                     else {
                         List {
