@@ -10,6 +10,6 @@ Because it seems interesting and I wanted to dive into the world of GUI coding
 
 and hello to Jason Isaacs
 
-(c) 2024 Tony Sanchez
+© Tony Sanchez 2024. All Rights Reserved
 
 
