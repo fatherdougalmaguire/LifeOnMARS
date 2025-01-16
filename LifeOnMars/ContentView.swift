@@ -28,7 +28,7 @@ struct ContentView: View {
                                 Rectangle().fill(ThisEmulatorCore.Core[(MyIndexRow*ThisEmulatorCore.CoreSizeInCols)+MyIndexCol].InstructionColour)
                             } // End ForEach
                         } // End GridRow
-                        .frame(width: 15.0, height: 15.0)
+                        .frame(width: ThisEmulatorCore.CoreCellSize, height: ThisEmulatorCore.CoreCellSize)
                     } // End ForEach
                 } // End Grid
                 Spacer()

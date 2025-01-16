@@ -90,9 +90,10 @@ class EmulatorCore : ObservableObject {
     
     var CoreCycles: Int = 1000
     var CoreRunning = false
-    var CoreSize: Int = 99
+    var CoreSize: Int = 8000
     var CoreSizeInRows: Int
     var CoreSizeInCols: Int
+    var CoreCellSize: Double
     var CoreDrawSize : Int
     var CoreUpdateFreq : Double = 0.1
     
@@ -106,21 +107,24 @@ class EmulatorCore : ObservableObject {
     init() {
         self.Warriors = []
         self.CoreWarriorQueue = []
-        if self.CoreSize < 100 {
+        if self.CoreSize <= 100 {
             self.CoreSizeInRows = 4
             self.CoreSizeInCols = 25
+            self.CoreCellSize = 15
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
-        else if self.CoreSize < 1000
+        else if self.CoreSize <= 1000
         {
             self.CoreSizeInRows = 20
             self.CoreSizeInCols = 50
+            self.CoreCellSize = 10
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
         else
         {
-            self.CoreSizeInRows = 100
-            self.CoreSizeInCols = 100
+            self.CoreSizeInRows = 50
+            self.CoreSizeInCols = 160
+            self.CoreCellSize = 10
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
         self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreDrawSize)
