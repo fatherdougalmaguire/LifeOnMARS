@@ -13,6 +13,7 @@
 		EA4006582B7733090067FCF9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA4006572B7733090067FCF9 /* Preview Assets.xcassets */; };
 		EA4006602B7733540067FCF9 /* EmulatorCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA40065F2B7733540067FCF9 /* EmulatorCore.swift */; };
 		EA801F632B9D49AB007EADEF /* AboutPanelCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA801F622B9D49AB007EADEF /* AboutPanelCommand.swift */; };
+		EADBD7982D3C7D720016D4F0 /* buffer.metal in Sources */ = {isa = PBXBuildFile; fileRef = EADBD7972D3C7D720016D4F0 /* buffer.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		EA4006592B7733090067FCF9 /* LifeOnMars.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeOnMars.entitlements; sourceTree = "<group>"; };
 		EA40065F2B7733540067FCF9 /* EmulatorCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulatorCore.swift; sourceTree = "<group>"; };
 		EA801F622B9D49AB007EADEF /* AboutPanelCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPanelCommand.swift; sourceTree = "<group>"; };
+		EADBD7972D3C7D720016D4F0 /* buffer.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = buffer.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,12 +58,13 @@
 		EA40064F2B7733080067FCF9 /* LifeOnMars */ = {
 			isa = PBXGroup;
 			children = (
-				EA4006502B7733080067FCF9 /* LifeOnMarsApp.swift */,
+				EA4006592B7733090067FCF9 /* LifeOnMars.entitlements */,
+				EADBD7972D3C7D720016D4F0 /* buffer.metal */,
+				EA801F622B9D49AB007EADEF /* AboutPanelCommand.swift */,
 				EA4006522B7733080067FCF9 /* ContentView.swift */,
 				EA40065F2B7733540067FCF9 /* EmulatorCore.swift */,
-				EA801F622B9D49AB007EADEF /* AboutPanelCommand.swift */,
+				EA4006502B7733080067FCF9 /* LifeOnMarsApp.swift */,
 				EA4006542B7733090067FCF9 /* Assets.xcassets */,
-				EA4006592B7733090067FCF9 /* LifeOnMars.entitlements */,
 				EA4006562B7733090067FCF9 /* Preview Content */,
 			);
 			path = LifeOnMars;
@@ -148,6 +151,7 @@
 				EA4006602B7733540067FCF9 /* EmulatorCore.swift in Sources */,
 				EA4006532B7733080067FCF9 /* ContentView.swift in Sources */,
 				EA801F632B9D49AB007EADEF /* AboutPanelCommand.swift in Sources */,
+				EADBD7982D3C7D720016D4F0 /* buffer.metal in Sources */,
 				EA4006512B7733080067FCF9 /* LifeOnMarsApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -298,7 +302,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 0.21;
+				MARKETING_VERSION = 0.22;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fatherdougalmaguire.LifeOnMars;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -329,7 +333,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 0.21;
+				MARKETING_VERSION = 0.22;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fatherdougalmaguire.LifeOnMars;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

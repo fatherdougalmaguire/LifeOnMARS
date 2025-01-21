@@ -65,7 +65,7 @@ class EmulatorCore : ObservableObject {
         var AfieldAddress:Int = 0
         var BfieldAddressMode:RedCodeAddressMode = RedCodeAddressMode.Immediate
         var BfieldAddress:Int = 0
-        var InstructionColour:Color = .gray
+        var InstructionColour:Color = .black
         
     }
     
@@ -103,6 +103,7 @@ class EmulatorCore : ObservableObject {
     var CoreWarriorQueue : Array<WarriorQueue>
     
     @Published var Core : Array<RedCodeInstruction>
+    @Published var CoreBuffer : Array<Float>
     
     init() {
         self.Warriors = []
@@ -122,15 +123,17 @@ class EmulatorCore : ObservableObject {
         }
         else
         {
-            self.CoreSizeInRows = 50
-            self.CoreSizeInCols = 160
+            self.CoreSizeInRows = 70
+            self.CoreSizeInCols = 120
             self.CoreCellSize = 10
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
-        self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreDrawSize)
+        self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreSize)
+        self.CoreBuffer = Array<Float>(repeating: 0.0,count:CoreSize)
         for MyIndex in 0..<CoreSize {
             self.Core[MyIndex].InstructionColour = .black
         }
+    
         self.CoreUpdateFreq = 0.1
     }
     
@@ -318,7 +321,7 @@ class EmulatorCore : ObservableObject {
         
         var TempRedCodeInstruction : Array<RedCodeInstruction> = []
         var TempCoreStartAddress : Int
-        var WarriorCollision = Array<Bool>(repeating: false,count:CoreDrawSize)
+        var WarriorCollision = Array<Bool>(repeating: false,count:CoreSize)
         var WarriorCollisionFlag : Bool
         var WarriorCode : String
         
@@ -336,14 +339,19 @@ class EmulatorCore : ObservableObject {
         ParseWarriorCode(WarriorCode)
         
         if Warriors.count == 0 {
-            TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
-            //TempCoreStartAddress = 0
+        //     TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
+             TempCoreStartAddress = 7800
             
             //      MOV 0, 1
             
             TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.MOV,Modifier : RedCodeModifier.DotI,AfieldAddressMode : RedCodeAddressMode.Direct,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Direct,BfieldAddress : 1,InstructionColour : .green))
             
             Warriors.append(Warrior(WarriorProgramID:0,WarriorProgramTitle:"Barry the IMP",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .green))
+            
+            CoreBuffer[TempCoreStartAddress] = 2
+            CoreBuffer[TempCoreStartAddress+1] = 2
+            CoreBuffer[TempCoreStartAddress+2] = 2
+            CoreBuffer[TempCoreStartAddress+3] = 2
             
             for WarriorIndex in 0...Warriors[0].WarriorCode.count-1 {
                 WarriorCollision[CoreWrapAddress(TempCoreStartAddress,WarriorIndex,CoreSize)] = true
@@ -352,8 +360,8 @@ class EmulatorCore : ObservableObject {
             CoreWarriorQueue.append(WarriorQueue(WarriorProgramID: 0, WarriorProcessID: 0, WarriorProgramStatus: true, WarriorProcessStatus: true,WarriorCurrentCoreAddress : TempCoreStartAddress))
             Core[TempCoreStartAddress] = TempRedCodeInstruction[0]
             
-            TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
-            //TempCoreStartAddress = CoreSize-1
+            //TempCoreStartAddress = Int.random(in: 0...CoreSize-1)
+            TempCoreStartAddress = 7900
             
             TempRedCodeInstruction = []
             
@@ -368,6 +376,11 @@ class EmulatorCore : ObservableObject {
             TempRedCodeInstruction.append(RedCodeInstruction(OpCode: RedCodeInstructionType.DAT,Modifier : RedCodeModifier.DotI,AfieldAddressMode : RedCodeAddressMode.Immediate,AfieldAddress:0,BfieldAddressMode : RedCodeAddressMode.Immediate,BfieldAddress : 0,InstructionColour : .red))
             
             Warriors.append(Warrior(WarriorProgramID:1,WarriorProgramTitle:"Kevin the Dwarf",WarriorCode:TempRedCodeInstruction,WarriorStartCoreAddress:TempCoreStartAddress,WarriorColour: .red))
+            
+            CoreBuffer[TempCoreStartAddress] = 1
+            CoreBuffer[TempCoreStartAddress+1] = 1
+            CoreBuffer[TempCoreStartAddress+2] = 1
+            CoreBuffer[TempCoreStartAddress+3] = 1
             
             repeat
             {
@@ -401,10 +414,11 @@ class EmulatorCore : ObservableObject {
     }
     
     func ResetCore() {
-        Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreDrawSize)
+        Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreSize)
         for MyIndex in 0..<CoreSize
         {
             Core[MyIndex].InstructionColour = .black
+            CoreBuffer[MyIndex] = 0
         }
         Warriors = []
         CoreWarriorQueue = []
@@ -481,6 +495,11 @@ class EmulatorCore : ObservableObject {
             }
             
             TempRedCodeRegister.RegisterInstruction = Core[EvalAddress]
+            
+            if Core[EvalAddress].InstructionColour == .red
+            { CoreBuffer[EvalAddress] = 1}
+            if Core[EvalAddress].InstructionColour == .green
+            { CoreBuffer[EvalAddress] = 2}
             TempRedCodeRegister.RegisterAddress = EvalAddress
             
             return TempRedCodeRegister
@@ -504,432 +523,436 @@ class EmulatorCore : ObservableObject {
         var SourceRegister:RedCodeRegister = RedCodeRegister.init()
         var DestinationRegister:RedCodeRegister = RedCodeRegister.init()
         
-        CoreCurrentAddress = CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress
-        
-        print(CoreCurrentAddress)
-        print(Warriors[CoreCurrentProcessIndex].WarriorProgramTitle)
-        
-        InstructionRegister.RegisterAddress = CoreCurrentAddress
-        InstructionRegister.RegisterInstruction = Core[CoreCurrentAddress]
-        
-        SourceRegister = CoreEvaluateOperand(InstructionRegister.RegisterInstruction.AfieldAddressMode,InstructionRegister.RegisterInstruction.AfieldAddress)
-        DestinationRegister = CoreEvaluateOperand(InstructionRegister.RegisterInstruction.BfieldAddressMode,InstructionRegister.RegisterInstruction.BfieldAddress)
-        
-        switch InstructionRegister.RegisterInstruction.OpCode {
-        case .DAT:
-            print("Bang! Warrior "+String(CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramID)+" is dead")
-            CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramStatus = false
-        case .MOV:
-            print("MOV")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA:
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
-            case .DotB:
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
-            case .DotAB:
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
-            case .DotBA:
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
-            case .DotF:
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
-            case .DotX:
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
-            case .DotI:
-                Core[DestinationRegister.RegisterAddress] = SourceRegister.RegisterInstruction
-            }
-        case .ADD:
-            print("ADD")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
-            case .DotB: //  B operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
-            case .DotAB: //  A operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
-            case .DotBA: //  B operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
-            case .DotF: //  A and B operands  =>  A and B operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
-            case .DotX: //  A and B operands  =>  B and A operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
-            case .DotI: // Whole instruction   =>  Whole instruction
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
-            }
-        case .SUB:
-            print("SUB")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotB: //  B operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotAB: //  A operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotBA: //  B operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotF: //  A and B operands  =>  A and B operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotX: //  A and B operands  =>  B and A operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotI: // Whole instruction   =>  Whole instruction
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
-            }
-        case .MUL:
-            print("MUL")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotB: //  B operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotAB: //  A operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotBA: //  B operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotF: //  A and B operands  =>  A and B operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotX: //  A and B operands  =>  B and A operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotI: // Whole instruction   =>  Whole instruction
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
-            }
-        case .DIV:
-            print("DIV")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotB: //  B operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotAB: //  A operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotBA: //  B operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotF: //  A and B operands  =>  A and B operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotX: //  A and B operands  =>  B and A operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotI: // Whole instruction   =>  Whole instruction
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
-            }
-        case .MOD:
-            print("MOD")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotB: //  B operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotAB: //  A operand  =>  B operand
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotBA: //  B operand  =>  A operand
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotF: //  A and B operands  =>  A and B operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
-            case .DotX: //  A and B operands  =>  B and A operands
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
-            case .DotI: // Whole instruction   =>  Whole instruction
-                Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
-                Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
-            }
-        case .JMP:
-            print("JMP")
-            JumpAddress = SourceRegister.RegisterAddress
-            JumpFlag = true
-        case .JMZ:
-            print("JMZ")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            }
-        case .JMN:
-            print("JMN")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            }
-        case .DJZ:
-            print("Error: DJZ is not implemented")
-        case .DJN:
-            print("DJN")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
-                    JumpAddress = SourceRegister.RegisterAddress
-                    JumpFlag = true
-                }
-            }
-        case .CMP,.SEQ:
-            print("CMP or SEQ")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.OpCode == DestinationRegister.RegisterInstruction.OpCode &&
-                    SourceRegister.RegisterInstruction.Modifier == DestinationRegister.RegisterInstruction.Modifier &&
-                    SourceRegister.RegisterInstruction.AfieldAddressMode == DestinationRegister.RegisterInstruction.AfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress &&
-                    SourceRegister.RegisterInstruction.BfieldAddressMode == DestinationRegister.RegisterInstruction.BfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress
-                {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            }
-        case .SNE:
-            print("Error: SNE is not implemented")
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.OpCode != DestinationRegister.RegisterInstruction.OpCode &&
-                    SourceRegister.RegisterInstruction.Modifier != DestinationRegister.RegisterInstruction.Modifier &&
-                    SourceRegister.RegisterInstruction.AfieldAddressMode != DestinationRegister.RegisterInstruction.AfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress &&
-                    SourceRegister.RegisterInstruction.BfieldAddressMode != DestinationRegister.RegisterInstruction.BfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress
-                {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            }
-        case .SLT:
-            switch InstructionRegister.RegisterInstruction.Modifier {
-            case .DotA: //  A operand  =>  A operand
-                if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotB: //  B operand  =>  B operand
-                if SourceRegister.RegisterInstruction.BfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotAB: //  A operand  =>  B operand
-                if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotBA: //  B operand  =>  A operand
-                if SourceRegister.RegisterInstruction.BfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotF: //  A and B operands  =>  A and B operands
-                if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotX: //  A and B operands  =>  B and A operands
-                if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            case .DotI: // Whole instruction   =>  Whole instruction
-                if SourceRegister.RegisterInstruction.OpCode != DestinationRegister.RegisterInstruction.OpCode &&
-                    SourceRegister.RegisterInstruction.Modifier != DestinationRegister.RegisterInstruction.Modifier &&
-                    SourceRegister.RegisterInstruction.AfieldAddressMode != DestinationRegister.RegisterInstruction.AfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress &&
-                    SourceRegister.RegisterInstruction.BfieldAddressMode != DestinationRegister.RegisterInstruction.BfieldAddressMode &&
-                    SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress
-                {
-                    JumpAddress = SourceRegister.RegisterAddress+1
-                    JumpFlag = true
-                }
-            }
-        case .LDP:
-            print("Error: LDP is not implemented")
-        case .STP:
-            print("Error: STP is not implemented")
-        case .NOP:
-            print("NOP")
-        case .SPL:
-            print("Error: SPL is not implemented")
-        }
-        if JumpFlag 
+        if CoreRunning
         {
-            CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = JumpAddress
-        }
-        else
-        {
-            CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
-        }
-        CoreCurrentProcessIndex = CoreCurrentProcessIndex+1
-        if CoreCurrentProcessIndex == CoreWarriorQueue.count
-        {
-            CoreCurrentProcessIndex = 0
+            
+            CoreCurrentAddress = CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress
+            
+            print(CoreCurrentAddress)
+            print(Warriors[CoreCurrentProcessIndex].WarriorProgramTitle)
+            
+            InstructionRegister.RegisterAddress = CoreCurrentAddress
+            InstructionRegister.RegisterInstruction = Core[CoreCurrentAddress]
+            
+            SourceRegister = CoreEvaluateOperand(InstructionRegister.RegisterInstruction.AfieldAddressMode,InstructionRegister.RegisterInstruction.AfieldAddress)
+            DestinationRegister = CoreEvaluateOperand(InstructionRegister.RegisterInstruction.BfieldAddressMode,InstructionRegister.RegisterInstruction.BfieldAddress)
+            
+            switch InstructionRegister.RegisterInstruction.OpCode {
+            case .DAT:
+                print("Bang! Warrior "+String(CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramID)+" is dead")
+                CoreWarriorQueue[CoreCurrentProcessIndex].WarriorProgramStatus = false
+            case .MOV:
+                print("MOV")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA:
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
+                case .DotB:
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
+                case .DotAB:
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
+                case .DotBA:
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
+                case .DotF:
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
+                case .DotX:
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddressMode = SourceRegister.RegisterInstruction.AfieldAddressMode
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].AfieldAddressMode = SourceRegister.RegisterInstruction.BfieldAddressMode
+                case .DotI:
+                    Core[DestinationRegister.RegisterAddress] = SourceRegister.RegisterInstruction
+                }
+            case .ADD:
+                print("ADD")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
+                case .DotB: //  B operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
+                case .DotAB: //  A operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
+                case .DotBA: //  B operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
+                case .DotF: //  A and B operands  =>  A and B operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
+                case .DotX: //  A and B operands  =>  B and A operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = SourceRegister.RegisterInstruction.AfieldAddress+DestinationRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = SourceRegister.RegisterInstruction.BfieldAddress+DestinationRegister.RegisterInstruction.BfieldAddress
+                }
+            case .SUB:
+                print("SUB")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotB: //  B operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotAB: //  A operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotBA: //  B operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotF: //  A and B operands  =>  A and B operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotX: //  A and B operands  =>  B and A operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress-SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress-SourceRegister.RegisterInstruction.BfieldAddress
+                }
+            case .MUL:
+                print("MUL")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotB: //  B operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotAB: //  A operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotBA: //  B operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotF: //  A and B operands  =>  A and B operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotX: //  A and B operands  =>  B and A operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress*SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress*SourceRegister.RegisterInstruction.BfieldAddress
+                }
+            case .DIV:
+                print("DIV")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotB: //  B operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotAB: //  A operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotBA: //  B operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotF: //  A and B operands  =>  A and B operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotX: //  A and B operands  =>  B and A operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress/SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress/SourceRegister.RegisterInstruction.BfieldAddress
+                }
+            case .MOD:
+                print("MOD")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotB: //  B operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotAB: //  A operand  =>  B operand
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotBA: //  B operand  =>  A operand
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotF: //  A and B operands  =>  A and B operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
+                case .DotX: //  A and B operands  =>  B and A operands
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    Core[DestinationRegister.RegisterAddress].AfieldAddress = DestinationRegister.RegisterInstruction.AfieldAddress%SourceRegister.RegisterInstruction.AfieldAddress
+                    Core[DestinationRegister.RegisterAddress].BfieldAddress = DestinationRegister.RegisterInstruction.BfieldAddress%SourceRegister.RegisterInstruction.BfieldAddress
+                }
+            case .JMP:
+                print("JMP")
+                JumpAddress = SourceRegister.RegisterAddress
+                JumpFlag = true
+            case .JMZ:
+                print("JMZ")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.AfieldAddress == 0 && SourceRegister.RegisterInstruction.BfieldAddress == 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                }
+            case .JMN:
+                print("JMN")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                }
+            case .DJZ:
+                print("Error: DJZ is not implemented")
+            case .DJN:
+                print("DJN")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.AfieldAddress != 0 && SourceRegister.RegisterInstruction.BfieldAddress != 0 {
+                        JumpAddress = SourceRegister.RegisterAddress
+                        JumpFlag = true
+                    }
+                }
+            case .CMP,.SEQ:
+                print("CMP or SEQ")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.OpCode == DestinationRegister.RegisterInstruction.OpCode &&
+                        SourceRegister.RegisterInstruction.Modifier == DestinationRegister.RegisterInstruction.Modifier &&
+                        SourceRegister.RegisterInstruction.AfieldAddressMode == DestinationRegister.RegisterInstruction.AfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.AfieldAddress == DestinationRegister.RegisterInstruction.AfieldAddress &&
+                        SourceRegister.RegisterInstruction.BfieldAddressMode == DestinationRegister.RegisterInstruction.BfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.BfieldAddress == DestinationRegister.RegisterInstruction.BfieldAddress
+                    {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                }
+            case .SNE:
+                print("Error: SNE is not implemented")
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.OpCode != DestinationRegister.RegisterInstruction.OpCode &&
+                        SourceRegister.RegisterInstruction.Modifier != DestinationRegister.RegisterInstruction.Modifier &&
+                        SourceRegister.RegisterInstruction.AfieldAddressMode != DestinationRegister.RegisterInstruction.AfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress &&
+                        SourceRegister.RegisterInstruction.BfieldAddressMode != DestinationRegister.RegisterInstruction.BfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress
+                    {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                }
+            case .SLT:
+                switch InstructionRegister.RegisterInstruction.Modifier {
+                case .DotA: //  A operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotB: //  B operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotAB: //  A operand  =>  B operand
+                    if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotBA: //  B operand  =>  A operand
+                    if SourceRegister.RegisterInstruction.BfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotF: //  A and B operands  =>  A and B operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.AfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotX: //  A and B operands  =>  B and A operands
+                    if SourceRegister.RegisterInstruction.AfieldAddress < DestinationRegister.RegisterInstruction.BfieldAddress && SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                case .DotI: // Whole instruction   =>  Whole instruction
+                    if SourceRegister.RegisterInstruction.OpCode != DestinationRegister.RegisterInstruction.OpCode &&
+                        SourceRegister.RegisterInstruction.Modifier != DestinationRegister.RegisterInstruction.Modifier &&
+                        SourceRegister.RegisterInstruction.AfieldAddressMode != DestinationRegister.RegisterInstruction.AfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.AfieldAddress != DestinationRegister.RegisterInstruction.AfieldAddress &&
+                        SourceRegister.RegisterInstruction.BfieldAddressMode != DestinationRegister.RegisterInstruction.BfieldAddressMode &&
+                        SourceRegister.RegisterInstruction.BfieldAddress != DestinationRegister.RegisterInstruction.BfieldAddress
+                    {
+                        JumpAddress = SourceRegister.RegisterAddress+1
+                        JumpFlag = true
+                    }
+                }
+            case .LDP:
+                print("Error: LDP is not implemented")
+            case .STP:
+                print("Error: STP is not implemented")
+            case .NOP:
+                print("NOP")
+            case .SPL:
+                print("Error: SPL is not implemented")
+            }
+            if JumpFlag 
+            {
+                CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = JumpAddress
+            }
+            else
+            {
+                CoreWarriorQueue[CoreCurrentProcessIndex].WarriorCurrentCoreAddress = CoreWrapAddress(CoreCurrentAddress,1,CoreSize)
+            }
+            CoreCurrentProcessIndex = CoreCurrentProcessIndex+1
+            if CoreCurrentProcessIndex == CoreWarriorQueue.count
+            {
+                CoreCurrentProcessIndex = 0
+            }
         }
         //date = Date()
         //milliseconds = String(Int(date.timeIntervalSince1970 * 1000))
