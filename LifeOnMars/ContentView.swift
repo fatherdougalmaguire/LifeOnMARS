@@ -14,7 +14,8 @@ struct CoreDisplayView: View {
     
     var body: some View {
         
-        VStack {  TimelineView(.animation)
+        VStack
+        {  TimelineView(.animation)
             { context in
                 Rectangle()
                     .fill(.red)
@@ -23,10 +24,10 @@ struct CoreDisplayView: View {
                     .scaleEffect(x: 7.0, y:7.0)
                     .onChange(of: context.date)
                 {
-                    ThisEmulatorCore.CoreStepExecute()
-                } // End onChnage
+                    ThisEmulatorCore.CoreExecute()
+                } // End onChange
             } // End context
-        }
+        } // End VStack
     } //End body
 }  // End CoreDisplayView
 
@@ -42,18 +43,18 @@ struct WarriorDisplayView: View {
         
         VStack{
             if ThisEmulatorCore.Warriors.count > 0 {
-            List {
-                ForEach(0..<ThisEmulatorCore.Warriors.count, id: \.self) { item in
-                    Toggle(isOn: $ThisEmulatorCore.CoreWarriorQueue[item].WarriorProgramStatus)  {Text(ThisEmulatorCore.Warriors[item].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[item].WarriorStartCoreAddress)).foregroundColor(ThisEmulatorCore.Warriors[item].WarriorColour)}.toggleStyle(.switch).disabled(true)
-                } // End ForEach
-            }  // End List
-        } // End if
+                List {
+                    ForEach(0..<ThisEmulatorCore.Warriors.count, id: \.self) { item in
+                        Toggle(isOn: $ThisEmulatorCore.CoreWarriorQueue[item].WarriorProgramStatus)  {Text(ThisEmulatorCore.Warriors[item].WarriorProgramTitle+" @ Address "+String(ThisEmulatorCore.Warriors[item].WarriorStartCoreAddress)).foregroundColor(ThisEmulatorCore.Warriors[item].WarriorColour)}.toggleStyle(.switch).disabled(true)
+                    } // End ForEach
+                }  // End List
+            } // End if
             else {
                 List {
                     Text("No warriors loaded")
                 } // End List
             } // End else
-        }
+        } // End VStack
     } // End body
 }  // End WarriorDisplayView
 
@@ -67,29 +68,35 @@ struct WarriorControlView: View {
     
     var body: some View {
         
-        HStack{
+        HStack
+        {
             Button("Start Battle")
             {
                 ThisEmulatorCore.SetCoreCycles(1000)
                 ThisEmulatorCore.CoreRunMode(true)
-            }
+            } // End Button
             .buttonStyle(.borderedProminent)
+            .tint(.orange)
             Button("End Battle")
             {
                 ThisEmulatorCore.CoreRunMode(false)
-            }
+            } // End Button
             .buttonStyle(.borderedProminent)
+            .tint(.orange)
             Button("Load Warriors")
             {
                 ThisEmulatorCore.SetCoreCycles(1000)
                 ThisEmulatorCore.LoadCore()
-            }
+            } // End Button
             .buttonStyle(.borderedProminent)
+            .tint(.orange)
             Button("Reset Core")
             {
                 ThisEmulatorCore.ResetCore()
-            }
-            .buttonStyle(.borderedProminent) }
+            } // End Button
+            .buttonStyle(.borderedProminent)
+            .tint(.orange)
+        } // End HStack
     } // End body
 }  // End WarriorControlView
 
@@ -105,10 +112,10 @@ struct CoreMemoryView: View {
         
         VStack {
             List {
-            ForEach(0..<ThisEmulatorCore.CoreSize, id: \.self) { MyIndex in Text(ThisEmulatorCore.FormatCoreOutput(MyIndex)).monospaced().foregroundColor(ThisEmulatorCore.Core[MyIndex].InstructionColour)
-            } // End ForEach
-        } // End List
-        }
+                ForEach(0..<ThisEmulatorCore.CoreSize, id: \.self) { MyIndex in Text(ThisEmulatorCore.FormatCoreOutput(MyIndex)).monospaced().foregroundColor(ThisEmulatorCore.Core[MyIndex].InstructionColour)
+                } // End ForEach
+            } // End List
+        } // End VStack
     } // End body
 }  // CoreMemoryView
 
@@ -122,10 +129,21 @@ struct ContentView: View {
     @StateObject var ThisEmulatorCore = EmulatorCore()
     
     var body: some View {
-        CoreDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:560)
-        CoreMemoryView().environmentObject(ThisEmulatorCore).frame(width:1000,height:120)
-        WarriorDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:80)
-        WarriorControlView().environmentObject(ThisEmulatorCore).frame(width:1000,height:50)
+//        ZStack
+//        {
+//            Color.white.ignoresSafeArea()
+            CoreDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:560,alignment: .top)
+//            Divider()
+//        HStack
+//            {
+            CoreMemoryView().environmentObject(ThisEmulatorCore).frame(width:1000,height:120)
+            //      Divider()
+            WarriorDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:80)
+ //                Divider()
+ //           } // End HStack
+//            Spacer()
+            WarriorControlView().environmentObject(ThisEmulatorCore).frame(width:1000,height:50,alignment: .bottom)
+  //      } // End ZStack
     } // End body
 }  // End ContentView
 

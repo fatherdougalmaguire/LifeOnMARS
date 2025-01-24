@@ -296,7 +296,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LifeOnMars;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.simulation-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Tony Sanchez";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Tony Sanchez";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -327,7 +327,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = LifeOnMars;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.simulation-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Tony Sanchez";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Tony Sanchez";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
