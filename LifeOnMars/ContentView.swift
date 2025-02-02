@@ -9,25 +9,51 @@
 import SwiftUI
 
 struct CoreDisplayView: View {
-    
+
     @EnvironmentObject var ThisEmulatorCore : EmulatorCore
-    
+
     var body: some View {
-        
+
         VStack
         {  TimelineView(.animation)
             { context in
                 Rectangle()
-                    .fill(.red)
-                    .frame(width: 100.0, height: 80.0)
-                    .colorEffect(ShaderLibrary.DrawCore(.floatArray(ThisEmulatorCore.CoreBuffer)))
-                    .scaleEffect(x: 7.0, y:7.0)
+                    .frame(width: CGFloat(ThisEmulatorCore.CoreSizeInCols*(ThisEmulatorCore.CoreCellSize+1)), height: CGFloat(ThisEmulatorCore.CoreSizeInRows*(ThisEmulatorCore.CoreCellSize+1)))
+                    .colorEffect(ShaderLibrary.DrawCore1(.floatArray(ThisEmulatorCore.CoreBuffer),.float(Float(ThisEmulatorCore.CoreSizeInCols)),.float(Float(ThisEmulatorCore.CoreSizeInRows)),.float(Float(ThisEmulatorCore.CoreCellSize))))
+//                    .frame(width: 100.0, height: 80.0)
+//                    .colorEffect(ShaderLibrary.DrawCore(.floatArray(ThisEmulatorCore.CoreBuffer)))
+//                    .scaleEffect(x: 7.0, y:7.0)
                     .onChange(of: context.date)
                 {
                     ThisEmulatorCore.CoreExecute()
                 } // End onChange
             } // End context
         } // End VStack
+    } //End body
+}  // End CoreDisplayView
+
+struct oldthing: View {
+    
+    @EnvironmentObject var ThisEmulatorCore : EmulatorCore
+    
+    var body: some View {
+        
+        HStack {
+                Grid(horizontalSpacing: 1.0, verticalSpacing: 1.0) {
+                    ForEach(0..<10) { MyIndexRow in
+                        GridRow {
+                            ForEach(0..<10) { MyIndexCol in
+                                Rectangle().fill(ThisEmulatorCore.Core[(MyIndexRow*10)+MyIndexCol].InstructionColour)
+                            } // End ForEach
+                        } // End GridRow
+                        .frame(width: 10.0, height: 10.0)
+                    } // End ForEach
+                } // End Grid
+            Rectangle()
+                .frame(width: CGFloat(ThisEmulatorCore.CoreSizeInCols*(ThisEmulatorCore.CoreCellSize+1)), height: CGFloat(ThisEmulatorCore.CoreSizeInRows*(ThisEmulatorCore.CoreCellSize+1)))
+                .colorEffect(ShaderLibrary.DrawCore1(.floatArray(ThisEmulatorCore.CoreBuffer),.float(Float(ThisEmulatorCore.CoreSizeInCols)),.float(Float(ThisEmulatorCore.CoreSizeInRows)),.float(Float(ThisEmulatorCore.CoreCellSize))))
+        } // End VStack
+        //.background(.blue)
     } //End body
 }  // End CoreDisplayView
 
@@ -129,21 +155,23 @@ struct ContentView: View {
     @StateObject var ThisEmulatorCore = EmulatorCore()
     
     var body: some View {
-//        ZStack
-//        {
-//            Color.white.ignoresSafeArea()
-            CoreDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:560,alignment: .top)
-//            Divider()
-//        HStack
-//            {
-            CoreMemoryView().environmentObject(ThisEmulatorCore).frame(width:1000,height:120)
-            //      Divider()
-            WarriorDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:80)
- //                Divider()
- //           } // End HStack
-//            Spacer()
-            WarriorControlView().environmentObject(ThisEmulatorCore).frame(width:1000,height:50,alignment: .bottom)
-  //      } // End ZStack
+        
+        //oldthing().environmentObject(ThisEmulatorCore).frame(width:1000,height:560,alignment: .top)
+        //        ZStack
+        //        {
+        //            Color.white.ignoresSafeArea()
+        CoreDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:560,alignment: .top)
+        //            Divider()
+        //        HStack
+        //            {
+        CoreMemoryView().environmentObject(ThisEmulatorCore).frame(width:1000,height:120)
+        //      Divider()
+        WarriorDisplayView().environmentObject(ThisEmulatorCore).frame(width:1000,height:80)
+        //                Divider()
+        //           } // End HStack
+        //            Spacer()
+        WarriorControlView().environmentObject(ThisEmulatorCore).frame(width:1000,height:50,alignment: .bottom)
+        //      } // End ZStack
     } // End body
 }  // End ContentView
 

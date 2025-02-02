@@ -93,7 +93,7 @@ class EmulatorCore : ObservableObject {
     var CoreSize: Int = 8000
     var CoreSizeInRows: Int
     var CoreSizeInCols: Int
-    var CoreCellSize: Double
+    var CoreCellSize: Int
     var CoreDrawSize : Int
     var CoreUpdateFreq : Double = 0.1
     
@@ -117,22 +117,41 @@ class EmulatorCore : ObservableObject {
         else if self.CoreSize <= 1000
         {
             self.CoreSizeInRows = 20
-            self.CoreSizeInCols = 50
-            self.CoreCellSize = 10
+           self.CoreSizeInCols = 50
+//            self.CoreSizeInRows = 20
+//            self.CoreSizeInCols = 20
+            self.CoreCellSize = 15
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
         else
         {
-            self.CoreSizeInRows = 70
-            self.CoreSizeInCols = 120
-            self.CoreCellSize = 10
+            self.CoreSizeInRows = 64
+            self.CoreSizeInCols = 125
+            self.CoreCellSize = 7
             CoreDrawSize = self.CoreSizeInRows*self.CoreSizeInCols
         }
         self.Core = Array<RedCodeInstruction>(repeating: RedCodeInstruction(),count:CoreSize)
         self.CoreBuffer = Array<Float>(repeating: 0.0,count:CoreSize)
         for MyIndex in 0..<CoreSize {
             self.Core[MyIndex].InstructionColour = .black
+            self.CoreBuffer[MyIndex] = 0
         }
+//        self.Core[1].InstructionColour = .green
+//        self.CoreBuffer[1] = 2
+//        self.Core[2].InstructionColour = .green
+//        self.CoreBuffer[2] = 2
+//        self.Core[3].InstructionColour = .green
+//        self.CoreBuffer[3] = 2
+//        self.Core[4].InstructionColour = .green
+//        self.CoreBuffer[4] = 2
+//        self.Core[30].InstructionColour = .red
+//        self.CoreBuffer[30] = 1
+//        self.Core[31].InstructionColour = .red
+//        self.CoreBuffer[31] = 1
+//        self.Core[32].InstructionColour = .red
+//        self.CoreBuffer[32] = 1
+//        self.Core[33].InstructionColour = .red
+//        self.CoreBuffer[33] = 1
         
         self.CoreUpdateFreq = 0.1
     }
